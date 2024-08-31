@@ -1,10 +1,21 @@
 import os
+# from tkinter import messagebox
+from tkinter import simpledialog, messagebox, filedialog
 import pandas as pd
 import gdown
 import requests
 import re
 import tkinter as tk
 from tkinter import filedialog
+
+def check_password():
+    """Prompt the user to enter a password."""
+    entered_password = simpledialog.askstring("Password", "Enter password:", show='*')
+    if entered_password == "456":
+        return True
+    else:
+        messagebox.showerror("Error", "Incorrect password!")
+        return False
 
 def create_folder(folder_path):
     if not os.path.exists(folder_path):
@@ -32,6 +43,7 @@ def process_excel(file_path):
 
     for index, row in df.iterrows():
         folder_name = str(row[name_column])
+        print("--------=------=-----",folder_name)
         folder_path = os.path.join(os.getcwd(), folder_name)
 
         create_folder(folder_path)
@@ -91,40 +103,49 @@ def run_script():
         result_label.config(text=f"Error: {str(e)}")
 
 # GUI setup
-root = tk.Tk()
-root.title("File Processor")
+# Main application
+def main_app():
+    global entry_path, entry_name_column, entry_link_columns, result_label, selected_file_label
 
-frame = tk.Frame(root)
-frame.pack(padx=10, pady=10)
+    root = tk.Tk()
+    root.title("File Processor")
 
-label_path = tk.Label(frame, text="Excel File Path:")
-label_path.grid(row=0, column=0, padx=5, pady=5)
+    frame = tk.Frame(root)
+    frame.pack(padx=10, pady=10)
 
-entry_path = tk.Entry(frame, width=50)
-entry_path.grid(row=0, column=1, padx=5, pady=5)
+    label_path = tk.Label(frame, text="Excel File Path:")
+    label_path.grid(row=0, column=0, padx=5, pady=5)
 
-button_browse = tk.Button(frame, text="Browse", command=browse_excel_file)
-button_browse.grid(row=0, column=2, padx=5, pady=5)
+    entry_path = tk.Entry(frame, width=50)
+    entry_path.grid(row=0, column=1, padx=5, pady=5)
 
-selected_file_label = tk.Label(frame, text="Selected File: None")
-selected_file_label.grid(row=1, column=0, columnspan=3, pady=5)
+    button_browse = tk.Button(frame, text="Browse", command=browse_excel_file)
+    button_browse.grid(row=0, column=2, padx=5, pady=5)
 
-label_name_column = tk.Label(frame, text="Name Column Number:")
-label_name_column.grid(row=2, column=0, padx=5, pady=5)
+    selected_file_label = tk.Label(frame, text="Selected File: None")
+    selected_file_label.grid(row=1, column=0, columnspan=3, pady=5)
 
-entry_name_column = tk.Entry(frame, width=15)
-entry_name_column.grid(row=2, column=1, padx=5, pady=5)
+    label_name_column = tk.Label(frame, text="Name Column Number:")
+    label_name_column.grid(row=2, column=0, padx=5, pady=5)
 
-label_link_columns = tk.Label(frame, text="Link Columns (Comma-separated):")
-label_link_columns.grid(row=3, column=0, padx=5, pady=5)
+    entry_name_column = tk.Entry(frame, width=15)
+    entry_name_column.grid(row=2, column=1, padx=5, pady=5)
 
-entry_link_columns = tk.Entry(frame, width=15)
-entry_link_columns.grid(row=3, column=1, padx=5, pady=5)
+    label_link_columns = tk.Label(frame, text="Link Columns (Comma-separated):")
+    label_link_columns.grid(row=3, column=0, padx=5, pady=5)
 
-button_run = tk.Button(frame, text="Run Script", command=run_script)
-button_run.grid(row=4, column=0, columnspan=3, pady=10)
+    entry_link_columns = tk.Entry(frame, width=15)
+    entry_link_columns.grid(row=3, column=1, padx=5, pady=5)
 
-result_label = tk.Label(frame, text="")
-result_label.grid(row=5, column=0, columnspan=3)
+    button_run = tk.Button(frame, text="Run Script", command=run_script)
+    button_run.grid(row=4, column=0, columnspan=3, pady=10)
 
-root.mainloop()
+    result_label = tk.Label(frame, text="")
+    result_label.grid(row=5, column=0, columnspan=3)
+
+    root.mainloop()
+
+# Entry point
+if __name__ == "__main__":
+    if check_password():
+        main_app()
