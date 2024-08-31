@@ -11,6 +11,11 @@ def create_folder(folder_path):
         os.makedirs(folder_path)
 
 def download_file(url, destination):
+    base, extension = os.path.splitext(destination)
+    counter = 1
+    while os.path.exists(destination):
+        destination = f"{base}_copy{counter}{extension}"
+        counter += 1
     gdown.download(url, destination, quiet=True)
 
 def eng_letter(n):
@@ -41,21 +46,26 @@ def process_excel(file_path):
                 direct_download_url = f'https://drive.google.com/uc?id={file_id}'
                 url_2 = f'https://drive.usercontent.google.com/download?id={file_id}&export=download&authuser=0'
                 
-                response = requests.head(url_2)
-                file_details = None
-                if response.status_code == 200:
-                    file_name = re.search(r'filename="([^"]+)"',  response.headers.get('Content-Disposition')).group(1) 
-                    destination_file = os.path.join(folder_path, os.path.basename(file_name))
+                try:
+                    response = requests.head(url_2, timeout=10)  # Add a timeout of 10 seconds
+                    if response.status_code == 200:
+                        file_name = re.search(r'filename="([^"]+)"', response.headers.get('Content-Disposition')).group(1) 
+                        destination_file = os.path.join(folder_path, os.path.basename(file_name))
 
-                    download_file(direct_download_url, destination_file)
+                        download_file(direct_download_url, destination_file)
 
-                    result_label.config(text="Script executed successfully!'\n'")
+                        result_label.config(text="Script executed successfully!")
 
-                else:
-                    cell_addr =  f'{eng_letter(col_num+1)}{index + 2}'
+                    else:
+                        cell_addr = f'{eng_letter(col_num+1)}{index + 2}'
+                        err_cells.append(cell_addr)
+
+                except requests.exceptions.RequestException as e:
+                    result_label.config(text=f"Error: {str(e)}")
+                    cell_addr = f'{eng_letter(col_num+1)}{index + 2}'
                     err_cells.append(cell_addr)
 
-                if err_cells != []:
+                if err_cells:
                     result_label.config(text=f"Script executed successfully!\n\nError: Invalid URL found in cells {err_cells}")
 
 def browse_excel_file():
@@ -75,7 +85,6 @@ def run_script():
         link_columns = [int(column.strip()) for column in entry_link_columns.get().split(',')]
         if excel_file_path and name_column and link_columns:
             process_excel(excel_file_path)
-            # result_label.config(text="Script executed successfully!")
         else:
             result_label.config(text="Please fill all the settings.")
     except Exception as e:
@@ -119,4 +128,3 @@ result_label = tk.Label(frame, text="")
 result_label.grid(row=5, column=0, columnspan=3)
 
 root.mainloop()
-
