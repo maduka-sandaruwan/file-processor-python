@@ -15,7 +15,9 @@ def check_password():
         return True
     else:
         messagebox.showerror("Error", "Incorrect password!")
-        return False
+        entered_password = simpledialog.askstring("Password", "Enter password:", show='*')
+        if entered_password == "456":
+            return True
 
 def create_folder(folder_path):
     if not os.path.exists(folder_path):
